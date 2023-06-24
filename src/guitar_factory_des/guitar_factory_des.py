@@ -7,11 +7,11 @@ import argparse
 
 
 class GuitarManufacturer:
-    def __init__(self, env, process_times, resources, target_guitars):
+    def __init__(self, env, process_times, resources, num_guitars_ordered):
         self.env = env
         self.process_times = process_times
         self.resources = resources
-        self.target_guitars = target_guitars
+        self.target_guitars = num_guitars_ordered
         self.completed_guitars = 0
         self.step_times = {}  # Dictionary to store step times per guitar
         self.cnc_machine = simpy.Resource(env, capacity=resources['cnc_machines'])
@@ -101,7 +101,7 @@ class GuitarManufacturer:
         yield self.env.process(self.run_plek_machine())
 
 
-def simulate_guitar_production(target_guitars, resources):
+def simulate_guitar_production(target_guitars, resources, num_simulations):
     env = simpy.Environment()
     process_times = {
         'cut_body': (25, 35),
@@ -130,66 +130,45 @@ def simulate_guitar_production(target_guitars, resources):
     return average_time_required, total_times
 
 
-# Example usage
-num_simulations = 100
-target_guitars = 1000
-resources = {
-    'cnc_machines': 2,
-    'cnc_operators': 2,
-    'neck_shaper': 1,
-    'assemblers': 2,
-    'setup_people': 2,
-    'plek_machine': 1
-}
+if __name__ == "__main__":
+    # Create an ArgumentParser object
+    parser = argparse.ArgumentParser(description='Simulate guitar production.')
 
-average_time_required, total_times = simulate_guitar_production(target_guitars, resources)
+    # Add command line arguments
+    parser.add_argument('--simulations', type=int, default=1000, help='number of simulations to run')
+    parser.add_argument('--guitars', type=int, default=100, help='number of guitars per simulation')
 
-print("Number of simulations:", num_simulations)
-print("Number of guitars per simulation:", target_guitars)
-print("Average time required to complete orders:", average_time_required, "minutes")
-
-# Create a Pandas DataFrame
-data = {'Simulation': range(1, num_simulations + 1), 'Total Time (minutes)': total_times}
-df = pd.DataFrame(data)
-
-# Create the outputs folder if it doesn't exist
-if not os.path.exists('output'):
-    os.makedirs('output')
-
-# Save the DataFrame as a CSV file in the outputs folder
-output_file = 'output/guitar_production_times.csv'
-df.to_csv(output_file, index=False)
-print("Guitar production times saved to", output_file)
-
-import argparse
-
-
-def process_command_line():
-    """
-    Parse command line arguments and return the parsed arguments.
-    """
-    parser = argparse.ArgumentParser(prog='guitar_building_code',
-                                     description='Simulate guitar building process')
-
-    # Add arguments
-    parser.add_argument(
-        "--resources", type=int, default=10,
-        help="Number of available resources (default = 10)"
-    )
-
-    parser.add_argument(
-        "--num_simulations", type=int, default=1,
-        help="Number of simulations to run (default = 1)"
-    )
-
-    parser.add_argument(
-        "--target_guitars", type=int, default=100,
-        help="Target number of guitars to build (default = 100)"
-    )
-
+    # Parse the command line arguments
     args = parser.parse_args()
-    return args
 
+    # Extract the values from the parsed arguments
+    num_simulations = args.simulations
+    target_guitars = args.guitars
 
-if __name__ == '__main__':
-    main()
+    resources = {
+        'cnc_machines': 2,
+        'cnc_operators': 2,
+        'neck_shaper': 1,
+        'assemblers': 2,
+        'setup_people': 2,
+        'plek_machine': 1
+    }
+
+    average_time_required, total_times = simulate_guitar_production(target_guitars, resources, num_simulations)
+
+    print("Number of simulations:", num_simulations)
+    print("Number of guitars per simulation:", target_guitars)
+    print("Average time required to complete orders:", average_time_required, "minutes")
+
+    # Create a Pandas DataFrame
+    data = {'Simulation': range(1, num_simulations + 1), 'Total Time (minutes)': total_times}
+    df = pd.DataFrame(data)
+
+    # Create the outputs folder if it doesn't exist
+    if not os.path.exists('output'):
+        os.makedirs('output')
+
+    # Save the DataFrame as a CSV file in the outputs folder
+    output_file = 'output/guitar_production_times.csv'
+    df.to_csv(output_file, index=False)
+    print("Guitar production times saved to", output_file)
