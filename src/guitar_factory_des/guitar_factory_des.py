@@ -137,6 +137,12 @@ if __name__ == "__main__":
     # Add command line arguments
     parser.add_argument('--simulations', type=int, default=1000, help='number of simulations to run')
     parser.add_argument('--guitars', type=int, default=100, help='number of guitars per simulation')
+    parser.add_argument('--cnc-machines', type=int, default=2, help='number of CNC machines')
+    parser.add_argument('--cnc-operators', type=int, default=2, help='number of CNC operators')
+    parser.add_argument('--neck-shaper', type=int, default=1, help='number of neck shapers')
+    parser.add_argument('--assemblers', type=int, default=2, help='number of assemblers')
+    parser.add_argument('--setup-people', type=int, default=2, help='number of setup people')
+    parser.add_argument('--plek-machine', type=int, default=1, help='number of Plek machines')
 
     # Parse the command line arguments
     args = parser.parse_args()
@@ -144,14 +150,13 @@ if __name__ == "__main__":
     # Extract the values from the parsed arguments
     num_simulations = args.simulations
     target_guitars = args.guitars
-
     resources = {
-        'cnc_machines': 2,
-        'cnc_operators': 2,
-        'neck_shaper': 1,
-        'assemblers': 2,
-        'setup_people': 2,
-        'plek_machine': 1
+        'cnc_machines': args.cnc_machines,
+        'cnc_operators': args.cnc_operators,
+        'neck_shaper': args.neck_shaper,
+        'assemblers': args.assemblers,
+        'setup_people': args.setup_people,
+        'plek_machine': args.plek_machine
     }
 
     average_time_required, total_times = simulate_guitar_production(target_guitars, resources, num_simulations)
